@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Detail — ShopCatalog</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🛒 ShopCatalog</a>
+  <div class="nav-links">
+    <a href="index.html">Products</a>
+    <a href="cart.html">
+      <div class="cart-icon">🛍️
+        <span class="cart-badge" id="cart-count" style="display:none">0</span>
+      </div>
+    </a>
+    <button class="btn btn-primary btn-sm" id="login-btn">Login</button>
+    <div id="user-menu" style="display:none; align-items:center; gap:0.5rem;">
+      <span style="font-weight:600; color:var(--gray)">👤 <span id="user-name"></span></span>
+      <button class="btn btn-secondary btn-sm" onclick="api.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="margin-top:2rem">
+  <div class="breadcrumb">
+    <a href="index.html">Home</a> / <span id="bc-category"></span> / <span id="bc-name"></span>
+  </div>
+  <div id="product-content"></div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+let qty = 1;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  updateNavAuth();
+  updateCartCount();
+  document.getElementById('login-btn').onclick = () => toast('Please login from the main page', 'error');
+
+  const id = new URLSearchParams(window.location.search).get('id');
+  if (!id) { window.location = 'index.html'; return; }
+
+  try {
+    const p = await api.getProduct(id);
+    document.title = `${p.name} — ShopCatalog`;
+    document.getElementById('bc-category').textContent = p.category_name || '';
+    document.getElementById('bc-name').textContent = p.name;
+
+    const stockClass = p.stock === 0 ? 'out-stock' : p.stock < 10 ? 'low-stock' : 'in-stock';
+    const stockText = p.stock === 0 ? 'Out of Stock' : p.stock < 10 ? `Only ${p.stock} left!` : `${p.stock} in stock`;
+
+    document.getElementById('product-content').innerHTML = `
+      <div class="product-detail">
+        <img src="${p.image_url}" alt="${p.name}" />
+        <div class="product-detail-info">
+          <div class="product-category">${p.category_name || ''}</div>
+          <h1>${p.name}</h1>
+          <div class="product-detail-price">$${parseFloat(p.price).toFixed(2)}</div>
+          <span class="stock-badge ${stockClass}" style="font-size:0.9rem;padding:0.3rem 0.8rem">${stockText}</span>
+          <p class="product-detail-desc" style="margin-top:1rem">${p.description || ''}</p>
+
+          ${p.stock > 0 ? `
+          <div class="quantity-selector">
+            <span style="font-weight:600;margin-right:0.5rem">Qty:</span>
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <span class="qty-display" id="qty-display">1</span>
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+          <button class="btn btn-primary" style="width:100%;padding:0.8rem;font-size:1rem" onclick="addToCart(${p.id}, '${p.name}', ${p.stock})">
+            🛒 Add to Cart
+          </button>` : `
+          <button class="btn btn-secondary" style="width:100%;padding:0.8rem;font-size:1rem" disabled>
+            Out of Stock
+          </button>`}
+
+          <div style="margin-top:1.5rem;padding:1rem;background:var(--light);border-radius:8px;font-size:0.85rem;color:var(--gray)">
+            ✅ Free shipping on orders over $50<br>
+            🔄 30-day return policy<br>
+            🔒 Secure checkout
+          </div>
+        </div>
+      </div>`;
+  } catch {
+    document.getElementById('product-content').innerHTML = `
+      <div class="empty-state"><div class="icon">😕</div><h3>Product not found</h3>
+      <a href="index.html" class="btn btn-primary" style="margin-top:1rem">Back to Shop</a></div>`;
+  }
+});
+
+function changeQty(delta) {
+  qty = Math.max(1, qty + delta);
+  document.getElementById('qty-display').textContent = qty;
+}
+
+async function addToCart(id, name, stock) {
+  if (!api.token()) { toast('Please login to add to cart', 'error'); return; }
+  if (qty > stock) { toast('Not enough stock', 'error'); return; }
+  try {
+    await api.addToCart(id, qty);
+    toast(`"${name}" × ${qty} added to cart!`);
+    updateCartCount();
+  } catch (err) { toast(err.message, 'error'); }
+}
+</script>
+</body>
+</html>

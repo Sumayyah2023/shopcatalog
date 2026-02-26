@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopCatalog — Browse Products</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="index.html" class="nav-brand">🛒 ShopCatalog</a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Products</a>
+    <a href="cart.html">
+      <div class="cart-icon">
+        🛍️
+        <span class="cart-badge" id="cart-count" style="display:none">0</span>
+      </div>
+    </a>
+    <button class="btn btn-primary btn-sm" id="login-btn" onclick="openModal('login')">Login</button>
+    <div id="user-menu" style="display:none; align-items:center; gap:0.5rem;">
+      <span style="font-weight:600; color:var(--gray)">👤 <span id="user-name"></span></span>
+      <button class="btn btn-secondary btn-sm" onclick="api.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Find Everything You Need</h1>
+  <p>Browse thousands of products across all categories</p>
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Search products..." />
+    <button onclick="applyFilters()">Search</button>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <span class="filter-label">Category:</span>
+  <div class="category-pills" id="category-pills">
+    <button class="pill active" data-slug="" onclick="selectCategory(this)">All</button>
+  </div>
+  <div class="price-filter">
+    <span class="filter-label">Price:</span>
+    <input type="number" id="min-price" placeholder="Min $" />
+    <span>—</span>
+    <input type="number" id="max-price" placeholder="Max $" />
+    <button class="btn btn-secondary btn-sm" onclick="applyFilters()">Apply</button>
+    <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Clear</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+  <div class="products-header">
+    <h2 id="products-title">All Products</h2>
+    <span class="products-count" id="products-count"></span>
+  </div>
+  <div class="products-grid" id="products-grid"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="modal-title">Login</h2>
+    <div id="register-name-group" class="form-group" style="display:none">
+      <label>Full Name</label>
+      <input type="text" id="reg-name" placeholder="John Doe" />
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@example.com" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" />
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="submitAuth()">Continue</button>
+    <div class="form-toggle" id="form-toggle">
+      Don't have an account? <span onclick="switchMode()">Register</span>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/products.js"></script>
+</body>
+</html>
