@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        WORKSPACE_DIR = '/var/jenkins_home/workspace/shopcatalog-pipeline'
+        PROJECT_NAME = 'shopcatalog'
+        COMPOSE_FILE = '/var/jenkins_home/workspace/shopcatalog-pipeline/docker-compose.yml'
     }
 
     stages {
@@ -16,22 +17,22 @@ pipeline {
         stage('Validate') {
             steps {
                 echo '🔍 Validating docker-compose...'
-                sh 'docker-compose config --quiet && echo "✅ docker-compose.yml is valid"'
+                sh 'docker-compose -p shopcatalog config --quiet && echo "✅ Valid"'
             }
         }
 
         stage('Build Images') {
             steps {
                 echo '🐳 Building Docker images...'
-                sh 'docker-compose build --no-cache'
+                sh 'docker-compose -p shopcatalog build --no-cache'
             }
         }
 
         stage('Deploy') {
             steps {
                 echo '🚀 Deploying...'
-                sh 'docker-compose down --remove-orphans || true'
-                sh 'docker-compose up -d'
+                sh 'docker-compose -p shopcatalog down --remove-orphans || true'
+                sh 'docker-compose -p shopcatalog up -d'
                 sh 'sleep 15'
             }
         }
