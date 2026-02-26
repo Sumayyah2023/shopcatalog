@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        WORKSPACE_DIR = '/var/jenkins_home/workspace/shopcatalog-pipeline'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -12,22 +16,22 @@ pipeline {
         stage('Validate') {
             steps {
                 echo '🔍 Validating docker-compose...'
-                sh 'docker compose -f docker-compose.yml config --quiet && echo "✅ Valid"'
+                sh 'docker-compose config --quiet && echo "✅ docker-compose.yml is valid"'
             }
         }
 
         stage('Build Images') {
             steps {
                 echo '🐳 Building Docker images...'
-                sh 'docker compose build --no-cache'
+                sh 'docker-compose build --no-cache'
             }
         }
 
         stage('Deploy') {
             steps {
                 echo '🚀 Deploying...'
-                sh 'docker compose down --remove-orphans'
-                sh 'docker compose up -d'
+                sh 'docker-compose down --remove-orphans || true'
+                sh 'docker-compose up -d'
                 sh 'sleep 15'
             }
         }
