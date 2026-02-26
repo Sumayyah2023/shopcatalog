@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        PROJECT_NAME = 'shopcatalog'
-        COMPOSE_FILE = '/var/jenkins_home/workspace/shopcatalog-pipeline/docker-compose.yml'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -16,7 +11,6 @@ pipeline {
 
         stage('Validate') {
             steps {
-                echo '🔍 Validating docker-compose...'
                 sh 'docker-compose -p shopcatalog config --quiet && echo "✅ Valid"'
             }
         }
@@ -40,8 +34,11 @@ pipeline {
         stage('Health Check') {
             steps {
                 echo '❤️  Checking health...'
-                sh 'curl -f http://localhost:5000/health && echo "✅ Backend OK"'
-                sh 'curl -fs http://localhost:3000 > /dev/null && echo "✅ Frontend OK"'
+                sh '''
+                    HOST_IP=$(ip route | grep default | awk "{print \$3}")
+                    curl -f http://$HOST_IP:5000/health && echo "✅ Backend OK"
+                    curl -fs http://$HOST_IP:3000 > /dev/null && echo "✅ Frontend OK"
+                '''
             }
         }
 
